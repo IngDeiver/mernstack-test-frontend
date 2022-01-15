@@ -1,4 +1,4 @@
-# Restful API with ExpresJS
+# SPA  with ReactJs
 This is a frontend component
 
 ### Features
