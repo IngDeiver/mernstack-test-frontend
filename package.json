@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
-    "@types/yup": "^0.29.13"
+    "@types/yup": "^0.29.13",
+    "mini-css-extract-plugin": "2.4.5"
   }
 }
