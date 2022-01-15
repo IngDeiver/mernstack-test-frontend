@@ -11,6 +11,7 @@ type ListItemComponentProps = {
 };
 
 const ListItemComponent = ({ product, onRemove, setUpdateProductId }: ListItemComponentProps) => {
+  
   return (
     <TableRow hover role="checkbox" tabIndex={-1} key={21}>
       <TableCell align="left">{product.name}</TableCell>

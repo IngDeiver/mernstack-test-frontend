@@ -6,7 +6,7 @@ This is a frontend component
 - Redux with Redux Toolkit, Redux persist, Immer and redux transform encrypt
 - Material UI
 - Compoment/Container design pattern
-- React useCallabck, React memo and
+- React useCallabck, React memo
 
 ### System architecture
 ![alt text for screen readers](https://firebasestorage.googleapis.com/v0/b/ingdeiver.appspot.com/o/MERN%20STACK%20APP%20ARCHITECTURE.png?alt=media&token=fae4764d-72ba-4dbf-9fc2-17714b856ba7 "Architecture diagram")

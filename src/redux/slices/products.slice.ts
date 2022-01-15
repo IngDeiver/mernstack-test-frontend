@@ -17,10 +17,6 @@ const prodctSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchProductsThunk.pending, () => {
-        toastId = showLoadingToast();
-        return initialState;
-      })
       .addCase(
         fetchProductsThunk.fulfilled,
         (_, action: PayloadAction<Array<GetProduct>>) => {
