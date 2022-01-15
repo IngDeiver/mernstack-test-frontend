@@ -9,12 +9,14 @@ import { makeStyles } from "@material-ui/core/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import React from "react";
 import { GetProduct } from "../types/GetProducto";
-import { list } from "../api/product.api";
+import { list, remove } from "../api/product.api";
 import { AxiosError, AxiosResponse } from "axios";
 import { showErrorToast } from "../utils/toast";
 import { UserLocalSesion } from "../types/UserLocalSesion";
 import { RootState } from "../redux/store";
 import { useAppSelector } from "../hooks/redux";
+import Swal, { SweetAlertResult } from "sweetalert2";
+import toast from "react-hot-toast";
 
 const useStyles = makeStyles({
   right_section: {
@@ -33,6 +35,8 @@ export default function ListProducts() {
 
   const getProducts = () => {
     if (session.access_token) {
+      console.log(session.access_token);
+      
       list(session.access_token)
         .then((res: AxiosResponse) => {
           const data: Array<GetProduct> = res.data;
@@ -41,6 +45,35 @@ export default function ListProducts() {
         })
         .catch((err: AxiosError) => showErrorToast(err.message));
     }
+  };
+
+  const onRemove = (product: GetProduct) => {
+    Swal.fire({
+      title: "Error!",
+      text: `Do you want to remove the produxt ${product.name} ?`,
+      icon: "question",
+      confirmButtonText: "Yes",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      showLoaderOnConfirm: true,
+    }).then((result: SweetAlertResult) => {
+      if (result.isConfirmed && session.access_token) {
+        toast.promise(
+          remove(session.access_token, product._id),
+          {
+            loading: "Removing...",
+            success: () => {
+              getProducts()
+              return "Product removed";
+            },
+            error: (error: AxiosError) => {
+              return `Something went wrong ${error.message}`;
+            },
+          },
+          { duration: 4000 }
+        );
+      }
+    });
   };
 
   React.useEffect(() => {
@@ -75,7 +108,12 @@ export default function ListProducts() {
                         <TableCell align="right">
                           <Grid container spacing={1} direction="row-reverse">
                             <Grid item>
-                              <Button variant="outlined">Remove</Button>
+                              <Button
+                                onClick={() => onRemove(product)}
+                                variant="outlined"
+                              >
+                                Remove
+                              </Button>
                             </Grid>
                             <Grid item>
                               <Button variant="outlined">Edit</Button>

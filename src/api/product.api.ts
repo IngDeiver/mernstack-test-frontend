@@ -14,6 +14,15 @@ const list = (access_token: string) => {
   });
 };
 
+
+const remove = (access_token: string, id: string) => {
+  return instance.delete(`/${id}`, {
+    headers: {
+      Authorization: `bearer ${access_token}`,
+    },
+  });
+};
+
 export {
-  list
+  list,remove
 }
