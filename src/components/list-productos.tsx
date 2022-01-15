@@ -9,14 +9,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import CircularProgress from "@mui/material/CircularProgress";
 import React from "react";
 import { GetProduct } from "../types/GetProducto";
-import { list, remove } from "../api/product.api";
-import { AxiosError, AxiosResponse } from "axios";
-import { showErrorToast } from "../utils/toast";
+import { AxiosError } from "axios";
 import { UserLocalSesion } from "../types/UserLocalSesion";
 import { RootState } from "../redux/store";
-import { useAppSelector } from "../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import Swal, { SweetAlertResult } from "sweetalert2";
 import toast from "react-hot-toast";
+import { fetchProductsThunk } from "../redux/thunks/product.thunks";
+import { remove } from "../api/product.api";
+import { setProductUpdateAction } from "../redux/slices/updateProduct.slice";
 
 const useStyles = makeStyles({
   right_section: {
@@ -26,8 +27,10 @@ const useStyles = makeStyles({
 
 export default function ListProducts() {
   const classes = useStyles();
-
-  const [products, setProducts] = React.useState<Array<GetProduct>>([]);
+  const products: Array<GetProduct> = useAppSelector(
+    (state: RootState) => state.products
+  );
+  const dispatch = useAppDispatch();
   const [fetching, setFetching] = React.useState<boolean>(true);
   const session: UserLocalSesion = useAppSelector(
     (state: RootState) => state.sesion
@@ -35,13 +38,15 @@ export default function ListProducts() {
 
   const getProducts = () => {
     if (session.access_token) {
-      list(session.access_token)
-        .then((res: AxiosResponse) => {
-          const data: Array<GetProduct> = res.data;
-          setProducts(data);
+      dispatch(fetchProductsThunk(session.access_token))
+        .unwrap()
+        .then(() => {
           setFetching(false);
         })
-        .catch((err: AxiosError) => showErrorToast(err.message));
+        .catch((err) => {
+          setFetching(false);
+          console.error(err);
+        });
     }
   };
 
@@ -61,7 +66,7 @@ export default function ListProducts() {
           {
             loading: "Removing...",
             success: () => {
-              getProducts()
+              getProducts();
               return "Product removed";
             },
             error: (error: AxiosError) => {
@@ -73,6 +78,10 @@ export default function ListProducts() {
       }
     });
   };
+
+  const setUpdateProductId = (product: GetProduct) => {
+    dispatch(setProductUpdateAction(product._id))
+  }
 
   React.useEffect(() => {
     getProducts();
@@ -114,7 +123,7 @@ export default function ListProducts() {
                               </Button>
                             </Grid>
                             <Grid item>
-                              <Button variant="outlined">Edit</Button>
+                              <Button onClick={() => setUpdateProductId(product)} variant="outlined">Edit</Button>
                             </Grid>
                           </Grid>
                         </TableCell>

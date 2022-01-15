@@ -1,5 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import userReducer from './slices/auth.slice'
+import productsReducer from './slices/products.slice'
+import updateProductReducer from './slices/updateProduct.slice'
 import { persistStore, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage' // defaults to localStorage for web
 import { encryptTransform } from 'redux-persist-transform-encrypt';
@@ -23,6 +25,8 @@ const persistedSesionReducer = persistReducer(persistSesionConfig, userReducer)
 export const store = configureStore({
   reducer: {
     sesion: persistedSesionReducer,
+    products: productsReducer,
+    updateProductId: updateProductReducer
   },
   middleware: (getDefaultMiddleware) =>
   getDefaultMiddleware({

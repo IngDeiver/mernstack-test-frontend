@@ -1,5 +1,6 @@
 import axios from "axios";
 import { CreateProduct } from "../types/CreateProduct";
+import { UpdateProduct } from "../types/UpdateProduct";
 
 const BASER_URL = process.env.REACT_APP_SERVER_URL;
 
@@ -15,6 +16,15 @@ const list = (access_token: string) => {
   });
 };
 
+const getById = (access_token: string, id: string) => {
+  return instance.get(`/${id}`, {
+    headers: {
+      Authorization: `bearer ${access_token}`,
+    },
+  });
+};
+
+
 const remove = (access_token: string, id: string) => {
   return instance.delete(`/${id}`, {
     headers: {
@@ -25,6 +35,14 @@ const remove = (access_token: string, id: string) => {
 
 const create = (access_token: string, product: CreateProduct) => {
   return instance.post(`/`, product, {
+    headers: {
+      Authorization: `bearer ${access_token}`,
+    },
+  });
+};
+
+const update = (access_token: string, product: UpdateProduct) => {
+  return instance.put(`/`, product, {
     headers: {
       Authorization: `bearer ${access_token}`,
     },
@@ -44,4 +62,4 @@ const uploadImage = (access_token: string, image: FormData
   );
 };
 
-export { list, remove, uploadImage, create };
+export { list, remove, uploadImage, create, getById, update };

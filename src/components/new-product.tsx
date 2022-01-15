@@ -9,8 +9,8 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { AxiosError, AxiosResponse } from "axios";
 import React from "react";
-import { uploadImage, create } from "../api/product.api";
-import { useAppSelector } from "../hooks/redux";
+import { uploadImage, create, getById, update } from "../api/product.api";
+import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import { RootState } from "../redux/store";
 import { UserLocalSesion } from "../types/UserLocalSesion";
 import { showErrorToast } from "../utils/toast";
@@ -19,23 +19,60 @@ import { useFormik } from "formik";
 import { CreateProduct } from "../types/CreateProduct";
 import toast from "react-hot-toast";
 import Box from "@mui/material/Box";
+import { fetchProductsThunk } from "../redux/thunks/product.thunks";
+import { GetProduct } from "../types/GetProducto";
+import { setProductUpdateAction } from "../redux/slices/updateProduct.slice";
+import { UpdateProduct } from "../types/UpdateProduct";
 
 const useStyles = makeStyles({
   left_section: {
     height: "80vh",
   },
+  cancelBtn: {
+    marginLeft: 10,
+    marginTop:10
+  },
 });
 
 export default function NewProduct() {
   const classes = useStyles();
+  const dispatch = useAppDispatch();
   const session: UserLocalSesion = useAppSelector(
     (state: RootState) => state.sesion
   );
   const [image, setImage] = React.useState<File | null>(null);
+  const [productToUpdate, setProductToUpdate] =
+    React.useState<GetProduct | null>(null);
+  const productUpdateId: string | null = useAppSelector(
+    (state: RootState) => state.updateProductId
+  );
 
   const onFileChange = (event: any) => {
     // Update the state
     setImage(event.target.files[0]);
+  };
+
+  const updateProduct = (newDataProduct: UpdateProduct) => {
+    if (session.access_token && productToUpdate) {
+      toast.promise(
+        update(session.access_token, newDataProduct),
+        {
+          loading: "Updating product",
+          success: (res: AxiosResponse) => {
+            if (session.access_token)
+              dispatch(fetchProductsThunk(session.access_token));
+            dispatch(setProductUpdateAction(null));
+            setProductToUpdate(null)
+            //form.resetForm()
+            return "Product updated";
+          },
+          error: (error: AxiosError) => {
+            return `Something went wrong ${error.message}`;
+          },
+        },
+        { duration: 4000 }
+      );
+    }
   };
 
   const saveProduct = (product: CreateProduct, setSubmitting: any) => {
@@ -47,7 +84,6 @@ export default function NewProduct() {
       formData.append("image", image, image?.name);
 
       // Details of the uploaded file
-      console.log(image);
 
       // Request made to the backend api
       // Send formData object
@@ -61,8 +97,10 @@ export default function NewProduct() {
                 loading: "Sign Up...",
                 success: () => {
                   setSubmitting(false);
-                  form.resetForm()
-                  setImage(null)
+                  form.resetForm();
+                  setImage(null);
+                  if (session.access_token)
+                    dispatch(fetchProductsThunk(session.access_token));
                   return "Product saved";
                 },
                 error: (error: AxiosError) => {
@@ -82,22 +120,63 @@ export default function NewProduct() {
     }
   };
 
+  const cancelUpdateProduct = () => {
+    dispatch(setProductUpdateAction(null));
+    setProductToUpdate(null);
+    form.resetForm();
+  };
+
+  const getProduct = () => {
+    if (session.access_token && productUpdateId) {
+      toast.promise(
+        getById(session.access_token, productUpdateId),
+        {
+          loading: "Getting product",
+          success: (res: AxiosResponse) => {
+            setProductToUpdate(res.data);
+            return "Product found";
+          },
+          error: (error: AxiosError) => {
+            return `Something went wrong ${error.message}`;
+          },
+        },
+        { duration: 4000 }
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    if (productUpdateId) {
+      getProduct();
+    }
+  }, [productUpdateId]);
+
   const ProductSchema = Yup.object().shape({
     name: Yup.string().required("The name is required"),
     price: Yup.number().required("The price is required"),
   });
 
   const form = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      name: "",
-      price: 0,
+      name: productToUpdate ? productToUpdate.name : "",
+      price: productToUpdate ? productToUpdate.price : 0,
     },
     onSubmit: (values, { setSubmitting }) => {
-      const product: CreateProduct = {
-        ...values,
-        imageUrl: "",
-      };
-      saveProduct(product, setSubmitting);
+      if (productToUpdate) {
+        const product: any = {
+          ...values,
+          _id: productToUpdate._id
+        };
+        updateProduct(product);
+      } else {
+        const product: CreateProduct = {
+          ...values,
+          imageUrl: "",
+        };
+
+        saveProduct(product, setSubmitting);
+      }
     },
     validationSchema: ProductSchema,
   });
@@ -142,6 +221,7 @@ export default function NewProduct() {
             size="small"
             label="Price"
             name="price"
+            inputProps={{ min: 0 }}
             onChange={form.handleChange}
             value={form.values.price}
             error={form.errors.price && form.touched.price ? true : false}
@@ -159,11 +239,27 @@ export default function NewProduct() {
               type="file"
               onChange={onFileChange}
             />
+            {productToUpdate && (
+              <Box textAlign={"center"}>
+                <a href={productToUpdate.imageUrl}>
+                  {productToUpdate.imageUrl}
+                </a>
+              </Box>
+            )}
           </Box>
           <Box textAlign="center" sx={{ my: 2 }}>
             <Button type="submit" variant="contained">
-              Save product
+              {productUpdateId ? "Update product" : "Save product"}
             </Button>
+            {productUpdateId && (
+              <Button
+                onClick={cancelUpdateProduct}
+                className={classes.cancelBtn}
+                variant="contained"
+              >
+                Cancel update
+              </Button>
+            )}
           </Box>
         </Box>
       </Paper>
