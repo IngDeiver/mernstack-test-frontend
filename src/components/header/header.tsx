@@ -3,10 +3,10 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
-import { useAppDispatch, useAppSelector } from "../hooks/redux";
-import { UserLocalSesion } from "../types/UserLocalSesion";
-import { RootState } from "../redux/store";
-import { logoutThunk } from "../redux/thunks/user.thunks";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { UserLocalSesion } from "../../types/UserLocalSesion";
+import { RootState } from "../../redux/store";
+import { logoutThunk } from "../../redux/thunks/user.thunks";
 export default function Header() {
   const dispatch = useAppDispatch();
   const session: UserLocalSesion = useAppSelector(
