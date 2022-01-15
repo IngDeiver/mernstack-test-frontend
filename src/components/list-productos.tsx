@@ -35,8 +35,6 @@ export default function ListProducts() {
 
   const getProducts = () => {
     if (session.access_token) {
-      console.log(session.access_token);
-      
       list(session.access_token)
         .then((res: AxiosResponse) => {
           const data: Array<GetProduct> = res.data;

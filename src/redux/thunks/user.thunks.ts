@@ -11,3 +11,14 @@ export const loginThunk = createAsyncThunk(
     return data
   }
 );
+
+export const logoutThunk = createAsyncThunk(
+  "users/logout",
+  async (access_token: string, _) => {
+   const response = await  userAPI.logout(access_token);
+    const data =  response.data;    
+    console.log("-->", data);
+    
+    return data
+  }
+);

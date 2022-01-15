@@ -16,8 +16,12 @@ const login = (credentials: UserCredentials) => {
   return instance.post(`/login`, credentials);
 };
 
-const logout = (credentials: UserCredentials) => {
-  return instance.post(`/logout`, credentials);
+const logout = (access_token: string) => {
+  return instance.post(`/logout`,  {
+    headers: {
+      Authorization: `bearer ${access_token}`,
+    },
+  });
 };
 
 export { create, login, logout };

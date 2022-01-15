@@ -1,55 +1,70 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { loginThunk } from "../thunks/user.thunks";
-import { showErrorToast, showLoadingToast, dismissToast } from '../../utils/toast'
+import { loginThunk, logoutThunk } from "../thunks/user.thunks";
+import {
+  showErrorToast,
+  showLoadingToast,
+  dismissToast,
+} from "../../utils/toast";
 import { UserLocalSesion } from "../../types/UserLocalSesion";
 
-var toastId: any = null
- 
+var toastId: any = null;
 
 const initialState = {
   access_token: null,
-  username: null
+  username: null,
 } as UserLocalSesion;
-
 
 const userSlice = createSlice({
   name: "user",
   initialState,
-  reducers: {
-    logout: () => {
-      return initialState
-    }
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-    .addCase(loginThunk.pending, () => {
-      toastId = showLoadingToast()
-      return initialState
-    })
-    .addCase(loginThunk.fulfilled, (_, action: PayloadAction<UserLocalSesion>) => {
-        if(toastId){
-          dismissToast(toastId)
-          toastId = null
-        }
-        
-        return action.payload
+      .addCase(loginThunk.pending, () => {
+        toastId = showLoadingToast();
+        return initialState;
       })
-    .addCase(loginThunk.rejected, (_, action ) => {
-       if(toastId){
-          dismissToast(toastId)
-          toastId = null
-        }
-      let message: any = `Error: ${action.error.message}`
+      .addCase(logoutThunk.pending, () => {
+        toastId = showLoadingToast();
+        return initialState;
+      })
+      .addCase(
+        loginThunk.fulfilled,
+        (_, action: PayloadAction<UserLocalSesion>) => {
+          if (toastId) {
+            dismissToast(toastId);
+            toastId = null;
+          }
 
-      if (action.error.message?.includes("Unauthorized")){
-        showErrorToast("Credenciales incorrectas o la cuenta no existe")
-      } else {
-        showErrorToast(message)
-      }
-      return initialState
-    })
+          return action.payload;
+        }
+      )
+      .addCase(logoutThunk.fulfilled, () => {
+        return initialState;
+      })
+      .addCase(loginThunk.rejected, (_, action) => {
+        if (toastId) {
+          dismissToast(toastId);
+          toastId = null;
+        }
+        let message: any = `Error: ${action.error.message}`;
+
+        if (action.error.message?.includes("Unauthorized")) {
+          showErrorToast("Credenciales incorrectas o la cuenta no existe");
+        } else {
+          showErrorToast(message);
+        }
+        return initialState;
+      })
+      .addCase(logoutThunk.rejected, (_, action) => {
+        if (toastId) {
+          dismissToast(toastId);
+          toastId = null;
+        }
+        // let message: any = `Error: ${action.error.message}`;
+        // showErrorToast(message);
+      });
   },
 });
 
-export const { logout:  logoutAction } = userSlice.actions
-export default userSlice.reducer
+export default userSlice.reducer;
