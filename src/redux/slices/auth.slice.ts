@@ -4,6 +4,7 @@ import {
   showErrorToast,
   showLoadingToast,
   dismissToast,
+  showSuccessToast,
 } from "../../utils/toast";
 import { UserLocalSesion } from "../../types/UserLocalSesion";
 
@@ -26,6 +27,13 @@ const userSlice = createSlice({
       })
       .addCase(logoutThunk.pending, () => {
         toastId = showLoadingToast();
+
+        if (toastId) {
+          dismissToast(toastId);
+          toastId = null;
+        }
+
+        showSuccessToast("Logout successfull")
         return initialState;
       })
       .addCase(
@@ -61,8 +69,8 @@ const userSlice = createSlice({
           dismissToast(toastId);
           toastId = null;
         }
-        // let message: any = `Error: ${action.error.message}`;
-        // showErrorToast(message);
+        let message: any = `Error: ${action.error.message}`;
+        showErrorToast(message);
       });
   },
 });

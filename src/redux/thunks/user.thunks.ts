@@ -14,10 +14,9 @@ export const loginThunk = createAsyncThunk(
 
 export const logoutThunk = createAsyncThunk(
   "users/logout",
-  async (access_token: string, _) => {
-   const response = await  userAPI.logout(access_token);
+  async () => {
+   const response = await  userAPI.logout();
     const data =  response.data;    
-    console.log("-->", data);
     
     return data
   }
